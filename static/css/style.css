@@ -1,23 +1,39 @@
 body {
-    background-color: #3a3b4c;
+    
+    font-family: Garamond, serif;
+    background-color: #0e1111;
 }
+
+
+.heading {
+    background-color: #232b2b;
+    border: 3px solid #0e1111;
+    width:75%;
+    margin: 0 auto;
+}
+
+.big_body{
+    background-color: #4f4944;
+    margin: 0 auto;
+    width: 75%:
+}
+
 
 .music-info {
-    margin-left: auto;
-    margin-right: auto;
-}
-
-.center {
-    margin: auto;
-    width: 50%;
-    border: 3px solid green;
+    margin: 0 auto;
+    
+    width: 550px;
+    height: 375px;
+    border: 3px solid #232b2b;
     padding: 10px;
+    background-color: #5c544e;
+
 }
 
 th,td {
     padding:15px;
 }
 
-div {
-    margin: auto;
+.container {
+    text-align: center;
 }

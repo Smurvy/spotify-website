@@ -25,31 +25,33 @@ def get_db_connection():
 
 @app.route('/')
 async def hello():
-    loop = asyncio.get_event_loop()
-    future1 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_artist')
-    future2 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_album')
-    future3 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_song')
-    future4 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_album_cover_url')
-    artist = await future1
-    album = await future2
-    song = await future3
-    album_cover_url = await future4
+    if requests.get("http://127.0.0.1:8000/api/is_playing").json()["is_playing"] == True:
+        loop = asyncio.get_event_loop()
+        future1 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_artist')
+        future2 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_album')
+        future3 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_song')
+        future4 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_album_cover_url')
+        artist = await future1
+        album = await future2
+        song = await future3
+        album_cover_url = await future4
 
-    print("finished getting")
+        # TODO: add functionality for when the image is not avaliable or user is not play a song
 
-    # TODO: add functionality for when the image is not avaliable or user is not play a song
+        artist = artist.json()["artist_name"]
+        album = album.json()["album_name"]
+        song = song.json()["song_name"]
+        album_cover_url = album_cover_url.json()["album_cover_url"]
+        
 
-    artist = artist.json()["artist_name"]
-    album = album.json()["album_name"]
-    song = song.json()["song_name"]
-    album_cover_url = album_cover_url.json()["album_cover_url"]
+        
+        
+        formatted_album_name = write_image(album_cover_url,album)
+        
     
+        
 
-    
-    
-    formatted_album_name = write_image(album_cover_url,album)
-    
-   
-    
-
-    return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg")
+        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg")
+    else:
+        print(requests.get("http://127.0.0.1:8000/api/is_playing").json())
+        return render_template("nothing_playing.html") 

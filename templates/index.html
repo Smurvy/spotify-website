@@ -1,30 +1,16 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="60" /> 
-    <link rel="stylesheet" href="{{ url_for('static', filename= 'css/style.css') }}">
-    <title>FlaskBlog</title>
-</head>
-<body>
-   <h1>Welcome to FlaskBlog</h1>
+{% extends "base.html" %}
+
+{% block content %}
    
-   <div class="center">
-    <table class="music-info">
-
-            
-            
-        
-            <th><p><img src={{ album_cover_directory }} alt={{ album }} width="300" height="300"></p></th>
-            <th>
-                <p>{{ artist }}</p>
-                <p>{{ album }}</p>
-                <p>{{ song }}</p>
-            </th>
-            
-
+    <table>  
+        <th><p><img src={{ album_cover_directory }} alt={{ album }} width="300" height="300"></p></th>
+        <th>
+            <p>{{ artist }}</p>
+            <p>{{ album }}</p>
+            <p>{{ song }}</p>
+        </th>
     </table>
-    </div>
+    
+{% endblock %}
    
-</body>
-</html>
+
