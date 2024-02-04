@@ -12,11 +12,6 @@ body {
     margin: 0 auto;
 }
 
-.big_body{
-    background-color: #4f4944;
-    margin: 0 auto;
-    width: 75%:
-}
 
 
 .music-info {
@@ -28,6 +23,16 @@ body {
     padding: 10px;
     background-color: #5c544e;
 
+}
+
+.review {
+    margin: 0 auto;
+    
+    width: 70%;
+    
+    border: 3px solid #232b2b;
+    padding: 10px;
+    background-color: #5c544e;
 }
 
 th,td {

@@ -43,15 +43,23 @@ async def hello():
         song = song.json()["song_name"]
         album_cover_url = album_cover_url.json()["album_cover_url"]
         
-
-        
-        
         formatted_album_name = write_image(album_cover_url,album)
         
     
-        
+        # make a call to a db to get the review for the db, if there is none, return a string "No review written yet"
+        connection = sqlite3.connect('database.db')
+        cur = connection.cursor()
+        review = cur.execute("SELECT review FROM reviews WHERE song=?", (song,)).fetchall()
 
-        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg")
+        if(len(review) > 0):
+            review = review[0][0]
+
+
+        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg",review= "There is currently no review!" if len(review) == 0 else review)
     else:
-        print(requests.get("http://127.0.0.1:8000/api/is_playing").json())
+        
         return render_template("nothing_playing.html") 
+
+@app.route('/submit_review')
+def submit_review():
+    return render_template

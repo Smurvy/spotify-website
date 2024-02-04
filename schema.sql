@@ -1,8 +1,7 @@
 DROP TABLE IF EXISTS songs;
 
-CREATE TABLE posts (
+CREATE TABLE reviews (
     song TEXT NOT NULL,
-    album TEXT NOT NULL,
-    artist TEXT NOT NULL,
-    content TEXT NOT NULL
+    rating INTEGER,
+    review TEXT NOT NULL
 );

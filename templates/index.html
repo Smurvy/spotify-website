@@ -1,6 +1,8 @@
 {% extends "base.html" %}
 
-{% block content %}
+
+
+{% block music_info %}
    
     <table>  
         <th><p><img src={{ album_cover_directory }} alt={{ album }} width="300" height="300"></p></th>
@@ -8,9 +10,21 @@
             <p>{{ artist }}</p>
             <p>{{ album }}</p>
             <p>{{ song }}</p>
+            
         </th>
+
     </table>
+
     
 {% endblock %}
-   
+
+{% block review %}
+    {{ review }}
+    <br>
+    <br>
+    <a href="http://127.0.0.1:5000/">Submit A Review Here</a>
+{% endblock %}
+
+
+
 
