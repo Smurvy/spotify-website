@@ -1,0 +1,29 @@
+{% extends "headers.html" %}
+
+{% block content %}
+
+<input type="text" id="review">
+<input class="btn" type="submit" value="Submit" onclick="postReview(${{{ song }}})">
+
+<script>
+    function postReview(song){
+        var input = document.getElementById("review").value;
+        console.log(input);
+        $.ajax({
+            type: 'POST',
+            url: 'http://127.0.0.1:8000/submit_review',
+            data: { 
+                "song": String(song),
+                "review": input
+            }
+        })
+    }
+
+</script>
+
+
+
+
+
+
+{% endblock %}

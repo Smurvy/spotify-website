@@ -16,8 +16,8 @@ def write_image(album_url,album_name):
         
         return album_name
 
-def get_db_connection():
-    conn = sqlite3.connect('database.db')
+def get_db_connection(name_db):
+    conn = sqlite3.connect(f'{name_db}.db')
     conn.row_factory = sqlite3.Row
     return conn
     
@@ -54,12 +54,27 @@ async def hello():
         if(len(review) > 0):
             review = review[0][0]
 
-
         return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg",review= "There is currently no review!" if len(review) == 0 else review)
     else:
         
         return render_template("nothing_playing.html") 
 
+@app.route('/review/<string:song>')
+def review(song):
+    return render_template("submit_review.html",song=song.replace("_", " "))
+
 @app.route('/submit_review')
 def submit_review():
-    return render_template
+    print("python code running....")
+    review = request.form.get("review")
+    song = request.form.get("song")
+
+    
+    conn = get_db_connection("database")
+    cur = conn.cursor()
+
+    cur.execute("""INSERT INTO reviews (song,rating,review) 
+               VALUES (?, 5,?)""", (song, review,))
+
+
+    return "SUCCESS"

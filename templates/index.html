@@ -22,7 +22,7 @@
     {{ review }}
     <br>
     <br>
-    <a href="http://127.0.0.1:5000/">Submit A Review Here</a>
+    <a href={{ "http://127.0.0.1:5000/review/" + song.replace(" ", "_") }}>Submit A Review Here</a>
 {% endblock %}
 
 
