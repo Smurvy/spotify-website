@@ -1,25 +1,37 @@
 {% extends "headers.html" %}
 
+
 {% block content %}
 
-<input type="text" id="review">
-<input class="btn" type="submit" value="Submit" onclick="postReview(${{{ song }}})">
-
 <script>
-    function postReview(song){
+    
+    function postReview(){
+        console.log("This is a test");
         var input = document.getElementById("review").value;
         console.log(input);
+
+
+        var SendInfo= { SendInfo: {"song": {{ song | safe }}, "review": input}};
+
         $.ajax({
             type: 'POST',
-            url: 'http://127.0.0.1:8000/submit_review',
-            data: { 
-                "song": String(song),
-                "review": input
+            url: 'http://127.0.0.1:5000/submit_review',
+            contentType: "application/json",
+            data: JSON.stringify(SendInfo),
+            error: function () {
+                console.log("error")
             }
-        })
+        });
+        
     }
+    window.postReview = postReview;
 
 </script>
+
+<input type="text" id="review">
+<input class="btn" type="submit" value="Submit" onclick="postReview()">
+
+
 
 
 

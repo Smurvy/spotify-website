@@ -1,4 +1,4 @@
-from flask import Flask,render_template
+from flask import Flask,render_template,request
 import requests
 import asyncio
 import sqlite3
@@ -63,11 +63,13 @@ async def hello():
 def review(song):
     return render_template("submit_review.html",song=song.replace("_", " "))
 
-@app.route('/submit_review')
+@app.route('/submit_review',methods=['POST'])
 def submit_review():
-    print("python code running....")
-    review = request.form.get("review")
-    song = request.form.get("song")
+    response = dict(request.get_json())
+    song = response["SendInfo"]["song"]
+    review = response["SendInfo"]["review"]
+
+
 
     
     conn = get_db_connection("database")
@@ -76,5 +78,7 @@ def submit_review():
     cur.execute("""INSERT INTO reviews (song,rating,review) 
                VALUES (?, 5,?)""", (song, review,))
 
+    conn.commit()
+    conn.close()
 
     return "SUCCESS"
