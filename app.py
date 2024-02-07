@@ -66,11 +66,12 @@ def review(song):
 @app.route('/submit_review',methods=['POST'])
 def submit_review():
     response = dict(request.get_json())
-    song = response["SendInfo"]["song"]
+    song = response["SendInfo"]["song"]["name"]
     review = response["SendInfo"]["review"]
 
 
-
+    print(review)
+    print(song)
     
     conn = get_db_connection("database")
     cur = conn.cursor()

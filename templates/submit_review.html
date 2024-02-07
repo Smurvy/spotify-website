@@ -2,7 +2,7 @@
 
 
 {% block content %}
-
+<meta id="song" data-name="{{ song }}">
 <script>
     
     function postReview(){
@@ -10,8 +10,11 @@
         var input = document.getElementById("review").value;
         console.log(input);
 
+        var song = $('#song').data();
 
-        var SendInfo= { SendInfo: {"song": {{ song | safe }}, "review": input}};
+
+
+        var SendInfo = { SendInfo: {"song": song, "review": input}};
 
         $.ajax({
             type: 'POST',
