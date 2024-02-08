@@ -14,7 +14,7 @@ def write_image(album_url,album_name):
         with open(f"static/images/{image_file_name}", 'wb') as handler:
             handler.write(img_data)
         
-        return album_name
+        return image_file_name
 
 def get_db_connection(name_db):
     conn = sqlite3.connect(f'{name_db}.db')
@@ -44,20 +44,52 @@ async def hello():
         album_cover_url = album_cover_url.json()["album_cover_url"]
         
         formatted_album_name = write_image(album_cover_url,album)
-        
-    
+        album_cover = convertToBinaryData(formatted_album_name)
+
+        conn = get_db_connection("database")
+        cur = conn.cursor()
+
+
+
+
+
+        cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review)
+                        SELECT ?,?,?,?,"There is currently no review"
+                        WHERE NOT EXISTS(SELECT 1 FROM songs WHERE song = ?);
+                        
+                        
+                        
+                        
+                        """, (album, artist, song, album_cover,song,))
+
         # make a call to a db to get the review for the db, if there is none, return a string "No review written yet"
-        connection = sqlite3.connect('database.db')
-        cur = connection.cursor()
-        review = cur.execute("SELECT review FROM reviews WHERE song=?", (song,)).fetchall()
+
+        review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
+
+        
+
+
+
+
+
 
         if(len(review) > 0):
             review = review[0][0]
 
-        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}.jpg",review= "There is currently no review!" if len(review) == 0 else review)
+        conn.commit()
+        conn.close()
+
+        # need to start pulling pictures/data from database
+        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}",review= "There is currently no review!" if len(review) == 0 else review)
     else:
         
         return render_template("nothing_playing.html") 
+
+def convertToBinaryData(filename):
+    # Convert digital data to binary format
+    with open("static/images/" + filename, 'rb') as file:
+        blobData = file.read()
+    return blobData
 
 @app.route('/review/<string:song>')
 def review(song):
@@ -76,8 +108,7 @@ def submit_review():
     conn = get_db_connection("database")
     cur = conn.cursor()
 
-    cur.execute("""INSERT INTO reviews (song,rating,review) 
-               VALUES (?, 5,?)""", (song, review,))
+    cur.execute("""UPDATE songs SET review = ? WHERE song = ?""", (review,song,))
 
     conn.commit()
     conn.close()

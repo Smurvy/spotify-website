@@ -8,7 +8,5 @@ with open('schema.sql') as f:
 
 cur = connection.cursor()
 
-cur.execute("""INSERT INTO reviews (song,rating,review) 
-               VALUES ("Sunglasses", 5,"Very good")""")
 connection.commit()
 connection.close()
