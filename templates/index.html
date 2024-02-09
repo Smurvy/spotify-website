@@ -5,7 +5,7 @@
 {% block music_info %}
    
     <table>  
-        <th><p><img src={{ album_cover_directory }} alt={{ album }} width="300" height="300"></p></th>
+        <th><p><img src="data:image/jpeg;base64,{{ album_cover | safe }}" alt={{ album }} width="300" height="300"></p></th>
         <th>
             <p>{{ artist }}</p>
             <p>{{ album }}</p>

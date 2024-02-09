@@ -2,6 +2,8 @@ from flask import Flask,render_template,request
 import requests
 import asyncio
 import sqlite3
+import base64
+import os
 
 
 
@@ -25,7 +27,12 @@ def get_db_connection(name_db):
 
 @app.route('/')
 async def hello():
+    conn = get_db_connection("database")
+    cur = conn.cursor()
+
+
     if requests.get("http://127.0.0.1:8000/api/is_playing").json()["is_playing"] == True:
+        
         loop = asyncio.get_event_loop()
         future1 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_artist')
         future2 = loop.run_in_executor(None, requests.get, 'http://127.0.0.1:8000/api/current_album')
@@ -36,22 +43,27 @@ async def hello():
         song = await future3
         album_cover_url = await future4
 
-        # TODO: add functionality for when the image is not avaliable or user is not play a song
+        
 
         artist = artist.json()["artist_name"]
         album = album.json()["album_name"]
         song = song.json()["song_name"]
         album_cover_url = album_cover_url.json()["album_cover_url"]
-        
+
         formatted_album_name = write_image(album_cover_url,album)
         album_cover = convertToBinaryData(formatted_album_name)
 
-        conn = get_db_connection("database")
-        cur = conn.cursor()
 
+        
+       
 
-
-
+        if(cur.execute("SELECT * FROM songs WHERE song=?", (song,)).fetchone() != None):
+            string = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
+            base64_encoded_image = base64.b64encode(string).decode("utf-8")
+            review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
+            return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0])
+        
+        
 
         cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review)
                         SELECT ?,?,?,?,"There is currently no review"
@@ -63,24 +75,20 @@ async def hello():
                         """, (album, artist, song, album_cover,song,))
 
         # make a call to a db to get the review for the db, if there is none, return a string "No review written yet"
+        
 
         review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
 
-        
+        string = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
+        base64_encoded_image = base64.b64encode(string).decode("utf-8")
 
 
-
-
-
-
-        if(len(review) > 0):
-            review = review[0][0]
 
         conn.commit()
         conn.close()
 
         # need to start pulling pictures/data from database
-        return render_template("index.html",artist=artist,album=album,song=song,album_cover_directory=f"static/images/{formatted_album_name}",review= "There is currently no review!" if len(review) == 0 else review)
+        return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0])
     else:
         
         return render_template("nothing_playing.html") 
@@ -89,6 +97,7 @@ def convertToBinaryData(filename):
     # Convert digital data to binary format
     with open("static/images/" + filename, 'rb') as file:
         blobData = file.read()
+        os.remove("static/images/" + filename)
     return blobData
 
 @app.route('/review/<string:song>')
@@ -97,7 +106,9 @@ def review(song):
 
 @app.route('/submit_review',methods=['POST'])
 def submit_review():
+    
     response = dict(request.get_json())
+    print(response)
     song = response["SendInfo"]["song"]["name"]
     review = response["SendInfo"]["review"]
 
