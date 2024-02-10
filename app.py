@@ -9,6 +9,8 @@ import os
 
 app = Flask(__name__)
 
+
+
 def write_image(album_url,album_name):
         img_data = requests.get(album_url).content
         album_name = album_name.replace(" ","").replace("/","_")
@@ -29,6 +31,8 @@ def get_db_connection(name_db):
 async def hello():
     conn = get_db_connection("database")
     cur = conn.cursor()
+
+    
 
 
     if requests.get("http://127.0.0.1:8000/api/is_playing").json()["is_playing"] == True:
@@ -61,18 +65,36 @@ async def hello():
             string = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
             base64_encoded_image = base64.b64encode(string).decode("utf-8")
             review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
-            return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0])
+
+            # this updates the play count each time the page is reloaded and the song exists in the database
+            # not ideal, but too lazy to deal with it, pretty garbage
+            # TODO: implement "Recently Listend" so we can check if the songn playing is new, then we only add if that song is new
+            
+            cur.execute("""UPDATE songs
+                        SET plays = plays + 1
+                        WHERE song = ?
+                        """,(song,))
+
+            #
+            
+
+            plays = cur.execute("""SELECT plays FROM songs WHERE song = ?""",(song,)).fetchone()[0]
+
+
+            conn.commit()
+            conn.close()
+            return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0],plays=plays)
         
         
 
-        cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review)
-                        SELECT ?,?,?,?,"There is currently no review"
+        cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review,plays)
+                        SELECT ?,?,?,?,"There is currently no review",1
                         WHERE NOT EXISTS(SELECT 1 FROM songs WHERE song = ?);
                         
                         
                         
                         
-                        """, (album, artist, song, album_cover,song,))
+                        """, (album, artist, song, album_cover,song))
 
         # make a call to a db to get the review for the db, if there is none, return a string "No review written yet"
         
