@@ -1,5 +1,6 @@
 {% extends "base.html" %}
 
+{% block title %}Riley's Music Blog{% endblock %}
 
 
 {% block music_info %}
@@ -7,7 +8,7 @@
     <table>  
         <th><p><img src="data:image/jpeg;base64,{{ album_cover | safe }}" alt={{ album }} width="300" height="300"></p></th>
         <th>
-            <p>{{ artist }}</p>
+            <a href="http://127.0.0.1:8999/artist_profile/{{ artist }}"><p>{{ artist }}</p></a>
             <p>{{ album }}</p>
             <p>{{ song }}</p>
             <p>played {{ plays }} time(s)</p>
@@ -23,7 +24,7 @@
     {{ review }}
     <br>
     <br>
-    <a href={{ "http://127.0.0.1:5000/review/" + song.replace(" ", "_") }}>Submit A Review Here</a>
+    <a href={{ "http://127.0.0.1:8999/review/" + song.replace(" ", "_") }}>Submit A Review Here</a>
 {% endblock %}
 
 

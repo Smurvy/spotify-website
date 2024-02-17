@@ -12,6 +12,12 @@ body {
     margin: 0 auto;
 }
 
+.artist-info {
+    margin: 0 auto;
+    border: 3px solid #232b2b;
+    padding: 10px;
+    background-color: #5c544e;
+}
 
 
 .music-info {

@@ -1,0 +1,27 @@
+{% extends "headers.html" %}
+
+{% block content %}
+<div class="container">
+
+    <div class="heading">
+        <h1><a href="http://127.0.0.1:8999/">{{ artist }}</a></h1>
+    </div>
+    <br>
+
+
+
+    <div class="artist-info">
+        {% block music_info %}
+        <table style="width:100%", border="1">
+            {% for song in songs %}
+                <tr>
+                    <td>{{ song["song"] }}</td>                     
+                    <td>{{ song["plays"] }}</td>                    
+                </tr>
+            {% endfor %}    
+        </table>
+        {% endblock %}
+    </div>
+</div>
+<br>
+{% endblock %}

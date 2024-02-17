@@ -4,6 +4,8 @@ import asyncio
 import sqlite3
 import base64
 import os
+import pprint
+
 
 
 
@@ -24,7 +26,16 @@ def get_db_connection(name_db):
     conn = sqlite3.connect(f'{name_db}.db')
     conn.row_factory = sqlite3.Row
     return conn
-    
+
+
+def formatData(t,s):
+    if not isinstance(t,dict) and not isinstance(t,list):
+        print("\t"*s+str(t))
+    else:
+        for key in t:
+            print("\t"*s+str(key))
+            if not isinstance(t,list):
+                formatData(t[key],s+1)
 
 
 @app.route('/')
@@ -57,7 +68,9 @@ async def hello():
         formatted_album_name = write_image(album_cover_url,album)
         album_cover = convertToBinaryData(formatted_album_name)
 
-
+        # must be everything AFTER the last slash in the share link
+        encode_url = "301e8VN6F6t9EmGM41boaN?si=efa5797342df48b1"
+        pprint.pprint(requests.get(f"http://127.0.0.1:8000/api/get_playlist/songs/{encode_url}/songs").json())
         
        
 
@@ -90,11 +103,9 @@ async def hello():
         cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review,plays)
                         SELECT ?,?,?,?,"There is currently no review",1
                         WHERE NOT EXISTS(SELECT 1 FROM songs WHERE song = ?);
-                        
-                        
-                        
-                        
                         """, (album, artist, song, album_cover,song))
+
+        plays = cur.execute("""SELECT plays FROM songs WHERE song = ?""",(song,)).fetchone()[0]
 
         # make a call to a db to get the review for the db, if there is none, return a string "No review written yet"
         
@@ -110,7 +121,7 @@ async def hello():
         conn.close()
 
         # need to start pulling pictures/data from database
-        return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0])
+        return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0],plays=plays)
     else:
         
         return render_template("nothing_playing.html") 
@@ -147,3 +158,26 @@ def submit_review():
     conn.close()
 
     return "SUCCESS"
+
+
+@app.route('/artist_profile/<string:artist>')
+def artist_profile(artist):
+    conn = get_db_connection("database")
+    cur = conn.cursor()
+
+    songs = []
+
+    data = cur.execute("SELECT song,plays FROM songs WHERE artist=? ORDER BY plays DESC", (artist,))
+    data = data.fetchall()
+    
+    for row in data:
+        songs.append({"song" : row[0],"plays" : row[1]})
+
+    conn.commit()
+    conn.close()
+
+
+    return render_template("artist_profile.html",artist=artist,songs=songs)
+
+if __name__ == "__main__":
+    app.run(port=8999, debug=True)
