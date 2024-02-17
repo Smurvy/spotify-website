@@ -3,17 +3,10 @@ import requests
 import asyncio
 import sqlite3
 import base64
-
 import pprint
 from helper_functions import image_helper
 
-
-
-
 app = Flask(__name__)
-
-
-
 
 def get_db_connection(name_db):
     conn = sqlite3.connect(f'{name_db}.db')
@@ -64,33 +57,28 @@ async def hello():
 
             review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
             plays = cur.execute("""SELECT plays FROM songs WHERE song = ?""",(song,)).fetchone()[0]
-            album_blob = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
-            base64_encoded_image = base64.b64encode(album_blob).decode("utf-8")
+            album_cover_blob = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
+            base64_encoded_album_cover = base64.b64encode(album_cover_blob).decode("utf-8")
 
 
             conn.commit()
             conn.close()
-            return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_image,review=review[0][0],plays=plays)
+            return render_template("index.html",artist=artist,album=album,song=song,album_cover=base64_encoded_album_cover,review=review[0][0],plays=plays)
         
-        # for some reason the write image function is doin nothing???
-        # TODO: fix whatever is happening here
-        image_file = image_helper.write_image(album_cover_url,album)
-        album_cover_blob = image_helper.convert_to_binary_data(image_file)
+        album_cover_blob = image_helper.get_image_blob(album_cover_url,album)
 
-        # writing data
+        # writing song data
         cur.execute("""INSERT INTO songs(album,artist,song,album_cover,review,plays)
                         SELECT ?,?,?,?,"There is currently no review",1
                         WHERE NOT EXISTS(SELECT 1 FROM songs WHERE song = ?);
                         """, (album, artist, song, album_cover_blob,song))
 
         # retrieving data from database
-        review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchall()
+        review = cur.execute("SELECT review FROM songs WHERE song=?", (song,)).fetchone()[0]
         plays = cur.execute("""SELECT plays FROM songs WHERE song = ?""",(song,)).fetchone()[0]
         # have to decode the blob data (of the album cover) in the database
-        album_blob = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
-        base64_encoded_album_cover = base64.b64encode(album_blob).decode("utf-8")
-
-
+        album_cover_blob = cur.execute("""SELECT album_cover FROM songs WHERE song = ? """,(song,)).fetchall()[0][0]
+        base64_encoded_album_cover = base64.b64encode(album_cover_blob).decode("utf-8")
 
         conn.commit()
         conn.close()
